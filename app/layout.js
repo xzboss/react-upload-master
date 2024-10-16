@@ -1,5 +1,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
+import Link from "next/link";
+import { Menu, Flex } from "antd";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -18,10 +20,28 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const items = [
+    { key: "1", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
+    { key: "2", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
+    { key: "3", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
+    { key: "4", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
+    { key: "5", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
+    { key: "6", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
+    { key: "7", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
+  ];
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <Flex>
+          <Menu
+            style={{ width: 256 }}
+            defaultSelectedKeys={["1"]}
+            defaultOpenKeys={["sub1"]}
+            mode="inline"
+            items={items}
+          />
+          <div style={{ padding: "20px" }}>{children}</div>
+        </Flex>
       </body>
     </html>
   );
