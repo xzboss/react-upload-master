@@ -21,13 +21,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   const items = [
-    { key: "1", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
-    { key: "2", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
-    { key: "3", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
-    { key: "4", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
-    { key: "5", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
-    { key: "6", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
-    { key: "7", label: "", icon: <Link href="/views/single-upload">单文件上传</Link> },
+    { key: "1", label: "", icon: <Link href="/views/single-upload">single</Link> },
+    { key: "2", label: "", icon: <Link href="/views/single-upload">single</Link> },
+    { key: "3", label: "", icon: <Link href="/views/single-upload">single</Link> },
+    { key: "4", label: "", icon: <Link href="/views/single-upload">single</Link> },
+    { key: "5", label: "", icon: <Link href="/views/single-upload">single</Link> },
+    { key: "6", label: "", icon: <Link href="/views/single-upload">single</Link> },
+    { key: "7", label: "", icon: <Link href="/views/single-upload">single</Link> },
   ];
   return (
     <html lang="en">
