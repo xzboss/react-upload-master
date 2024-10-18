@@ -4,9 +4,6 @@ class RequestController {
   maxSize = 6;
   waitQueue = [];
   requestQueue = new Set(); // 正在发起的请求队列
-  constructor(maxSize) {
-    this.maxSize = maxSize;
-  }
 
   post(...args) {
     const fn = () => {
@@ -28,5 +25,5 @@ class RequestController {
     }
   }
 }
-const requestController = new RequestController(6);
+const requestController = new RequestController();
 export const post = requestController.post.bind(requestController);

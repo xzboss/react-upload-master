@@ -21,13 +21,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   const items = [
-    { key: "1", label: "", icon: <Link href="/views/single-upload">single</Link> },
-    { key: "2", label: "", icon: <Link href="/views/multiple-upload">multiple</Link> },
-    { key: "3", label: "", icon: <Link href="/views/single-upload">single</Link> },
-    { key: "4", label: "", icon: <Link href="/views/single-upload">single</Link> },
-    { key: "5", label: "", icon: <Link href="/views/single-upload">single</Link> },
-    { key: "6", label: "", icon: <Link href="/views/single-upload">single</Link> },
-    { key: "7", label: "", icon: <Link href="/views/single-upload">single</Link> },
+    { key: "1", label: <Link href="/views/single-upload">single</Link> },
+    { key: "2", label: <Link href="/views/multiple-upload">multiple</Link> },
+    { key: "3", label: <Link href="/views/stream-upload">stream</Link> },
+    { key: "4", label: <Link href="/views/single-upload">single</Link> },
+    { key: "5", label: <Link href="/views/single-upload">single</Link> },
+    { key: "6", label: <Link href="/views/single-upload">single</Link> },
+    { key: "7", label: <Link href="/views/single-upload">single</Link> },
   ];
   return (
     <html lang="en">
@@ -35,8 +35,6 @@ export default function RootLayout({ children }) {
         <Flex>
           <Menu
             style={{ width: 256 }}
-            defaultSelectedKeys={["1"]}
-            defaultOpenKeys={["sub1"]}
             mode="inline"
             items={items}
           />

@@ -5,7 +5,7 @@ import Trigger from "@/components/Trigger";
 import List from "@/components/List";
 import { post } from "@/utils/request";
 
-const MultipleUpload = () => {
+const StreamUpload = () => {
   const [fileList, setFileList] = useState([]); // { file: File, progress: number, controller: AbortController }[]
 
   const onChange = (files) => {
@@ -13,19 +13,20 @@ const MultipleUpload = () => {
   };
   const submit = () => {
     for (const file of fileList) {
-      const formData = new FormData();
-      formData.append("file", file.file);
-      
-      post("/api/multiple-upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        signal: file.controller.signal,
-        onUploadProgress: (event) => {
-          file.progress = (event.progress * 100) >> 0;
-          setFileList([...fileList]);
-        },
-      });
+      console.log(file)
+      // const formData = new FormData();
+      // formData.append("file", file.file);
+
+      // post("/api/multiple-upload", formData, {
+      //   headers: {
+      //     "Content-Type": "multipart/form-data",
+      //   },
+      //   signal: file.controller.signal,
+      //   onUploadProgress: (event) => {
+      //     file.progress = (event.progress * 100) >> 0;
+      //     setFileList([...fileList]);
+      //   },
+      // });
     }
   };
   const onRemove = (index) => {
@@ -46,4 +47,4 @@ const MultipleUpload = () => {
     </div>
   );
 };
-export default MultipleUpload;
+export default StreamUpload;
