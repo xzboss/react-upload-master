@@ -1,7 +1,7 @@
+import Link from "next/link";
+import { Menu, Flex, Input } from "antd";
 import localFont from "next/font/local";
 import "./globals.css";
-import Link from "next/link";
-import { Menu, Flex } from "antd";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
