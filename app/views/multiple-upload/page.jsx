@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "antd";
 import Trigger from "@/components/Trigger";
 import List from "@/components/List";
-import axios from "axios";
+import { post } from "@/utils/request";
 
 const MultipleUpload = () => {
   const [fileList, setFileList] = useState([]); // { file: File, progress: number, controller: AbortController }[]
@@ -15,8 +15,7 @@ const MultipleUpload = () => {
     for (const file of fileList) {
       const formData = new FormData();
       formData.append("file", file.file);
-
-      axios.post("/api/multiple-upload", formData, {
+      post("/api/multiple-upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

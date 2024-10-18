@@ -18,7 +18,8 @@ const List = ({ fileList = [], onRemove, onCancel }) => {
   const remove = (index) => {
     onRemove(index);
   };
-  const cancel = (index, controller) => {
+  const cancel = (index, controller, progress) => {
+    if (progress >= 1) return;
     controller.abort();
     onCancel(index);
   };
@@ -33,7 +34,7 @@ const List = ({ fileList = [], onRemove, onCancel }) => {
                 <Button type="primary" danger onClick={() => remove(index)}>
                   remove
                 </Button>
-                <Button danger onClick={() => cancel(index, controller)}>
+                <Button danger onClick={() => cancel(index, controller, progress)}>
                   cancel
                 </Button>
               </div>
