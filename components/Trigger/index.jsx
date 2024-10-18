@@ -4,7 +4,7 @@ import { Button } from "antd";
 
 import style from "./index.module.scss";
 
-const Trigger = ({ children, className, onChange }) => {
+const Trigger = ({ children, className, onChange, multiple = false }) => {
   const inputRef = useRef(null);
   const handleClick = () => {
     if (!inputRef.current) return;
@@ -12,7 +12,13 @@ const Trigger = ({ children, className, onChange }) => {
   };
   return (
     <div className={style.container}>
-      <input type="file" className={style.fileInput} ref={inputRef} onChange={(e) => onChange(e.target.files)} />
+      <input
+        multiple={multiple}
+        type="file"
+        className={style.fileInput}
+        ref={inputRef}
+        onChange={(e) => onChange(e.target.files)}
+      />
       <Button className={className || ""} onClick={handleClick}>
         {children}
       </Button>

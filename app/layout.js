@@ -22,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   const items = [
     { key: "1", label: "", icon: <Link href="/views/single-upload">single</Link> },
-    { key: "2", label: "", icon: <Link href="/views/single-upload">single</Link> },
+    { key: "2", label: "", icon: <Link href="/views/multiple-upload">multiple</Link> },
     { key: "3", label: "", icon: <Link href="/views/single-upload">single</Link> },
     { key: "4", label: "", icon: <Link href="/views/single-upload">single</Link> },
     { key: "5", label: "", icon: <Link href="/views/single-upload">single</Link> },

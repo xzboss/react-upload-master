@@ -1,12 +1,11 @@
 import dayjs from "dayjs";
 export const generateFile = (size) => {
-  console.log("first");
   size = Number(size);
   if (size <= 0 || typeof size !== "number") return;
   if (size > 1000) {
     return alert("size <= 1000");
   }
-  sizeByte = size * 1024;
+  const sizeByte = size * 1024;
   const blob = new Blob(new Uint8Array(sizeByte), { type: "multipart/form-data" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
