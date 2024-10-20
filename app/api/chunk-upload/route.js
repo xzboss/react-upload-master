@@ -9,17 +9,25 @@ export const config = {
 };
 
 export async function POST(req) {
-  const formData = await req.formData(); // {Symbol(): [{ name: '前端命名', value: File }]}
+  console.clear();
+  const formData = await req.formData();
   const file = formData.get("file");
+  const chunkIndex = formData.get("chunkIndex");
+  const chunkNum = formData.get("chunkNum");
+  const fileName = formData.get("fileName");
+  const fileExt = formData.get("fileExt");
 
   if (!file) return NextResponse.json({ error: "你没有上传任何东西" });
 
   try {
     // 定义暂存路径
-    const uploadDir = path.join(process.cwd(), "/uploadCache");
+    const uploadDir = path.join(
+      process.cwd(),
+      `/uploadCache/${fileName}-total${chunkNum}`
+    );
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-    const filePath = path.join(uploadDir, file.name);
+    const filePath = path.join(uploadDir, `chunk-${chunkIndex}`);
     const reader = file.stream().getReader();
     const writer = fs.createWriteStream(filePath);
 
@@ -27,7 +35,7 @@ export async function POST(req) {
       const { done, value } = await reader.read();
       if (done) {
         writer.end();
-        return console.log(`写入${file.name} 成功`);
+        return console.log(`写入chunk-${chunkIndex} 成功`);
       }
       writer.write(value);
       pump();

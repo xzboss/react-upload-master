@@ -1,5 +1,4 @@
 "use client";
-import { useRef } from "react";
 import { Button, Progress } from "antd";
 
 import style from "./index.module.scss";
@@ -19,7 +18,7 @@ const List = ({ fileList = [], onRemove, onCancel }) => {
     onRemove(index);
   };
   const cancel = (index, controller, progress) => {
-    if (progress >= 1) return;
+    if ((progress >= 100 || controller.signal, aborted)) return;
     controller.abort();
     onCancel(index);
   };
@@ -27,7 +26,10 @@ const List = ({ fileList = [], onRemove, onCancel }) => {
     <div className={style.container}>
       {fileList.map(({ file, progress, controller }, index) => {
         return (
-          <div className={style.itemWrapper} key={index} style={{ opacity: controller.signal.aborted ? 0.5 : 1 }}>
+          <div
+            className={style.itemWrapper}
+            key={index}
+            style={{ opacity: controller.signal.aborted ? 0.5 : 1 }}>
             <div className={style.content}>
               <div className={style.filename}>{file.name}</div>
               <div className={style.operation}>
