@@ -39,7 +39,7 @@ const ResumableUpload = () => {
     setFileList([...list]);
   };
 
-  const submit = () => {
+  const submit = async () => {
     for (const file of fileList) {
       // 分片
       const chunkNum = Math.ceil(file.file.size / chunkSize);
