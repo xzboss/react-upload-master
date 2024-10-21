@@ -12,9 +12,7 @@ const ChunkUpload = () => {
   const [fileList, setFileList] = useState([]); // { file: File, progress: number, controller: AbortController }[]
 
   const onChange = (files) => {
-    setFileList(
-      Array.from(files).map((file) => ({ file, progress: 0, controller: new AbortController() }))
-    );
+    setFileList(Array.from(files).map((file) => ({ file, progress: 0, controller: new AbortController() })));
   };
   const submit = () => {
     console.log(fileList);
@@ -22,6 +20,7 @@ const ChunkUpload = () => {
       console.log(file, "@@@@");
       // 分片
       const chunkNum = Math.ceil(file.file.size / chunkSize);
+      const part = Math.round((1 / chunkNum) * 100);
       for (let i = 0; i < chunkNum; i++) {
         console.log(1);
 
@@ -31,7 +30,7 @@ const ChunkUpload = () => {
 
         const formData = new FormData();
         formData.append("file", fileChunk);
-        formData.append("chunkIndex", i + 1);
+        formData.append("chunkIndex", i);
         formData.append("chunkNum", chunkNum);
         formData.append("fileName", file.file.name.split(".")[0]);
         formData.append("fileExt", file.file.name.split(".")[1] || "");
@@ -42,7 +41,7 @@ const ChunkUpload = () => {
           },
           signal: file.controller.signal,
           onUploadProgress: (event) => {
-            file.progress = Math.round((i / chunkNum) * 100);
+            file.progress = part * i + Math.round(part * event.progress * 100);
             setFileList([...fileList]);
           },
         });
@@ -63,11 +62,7 @@ const ChunkUpload = () => {
         select
       </Trigger>
       <List fileList={fileList} onRemove={onRemove} onCancel={onCancel} />
-      {fileList.length > 0 ? (
-        <Button color="green" type="primary" onClick={submit} children="submit" />
-      ) : (
-        ""
-      )}
+      {fileList.length > 0 ? <Button color="green" type="primary" onClick={submit} children="submit" /> : ""}
     </div>
   );
 };

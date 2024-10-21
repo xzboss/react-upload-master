@@ -8,6 +8,24 @@ export const config = {
   },
 };
 
+// 合并文件
+async function mergeFs(fileDir, filePath, chunkNum, fileName) {
+  const writeStream = fs.createWriteStream(filePath);
+  await new Promise((resolve, _) => {
+    for (let i = 0; i < chunkNum; i++) {
+      const chunkPath = path.join(fileDir, `chunk-${i}`);
+      const data = fs.readFileSync(chunkPath);
+      writeStream.write(data);
+      fs.unlinkSync(chunkPath);
+    }
+    writeStream.end();
+    writeStream.on("finish", resolve);
+  });
+
+  fs.rmdirSync(fileDir);
+  return console.log(`合并${fileName} 成功`);
+}
+
 export async function POST(req) {
   console.clear();
   const formData = await req.formData();
@@ -17,30 +35,40 @@ export async function POST(req) {
   const fileName = formData.get("fileName");
   const fileExt = formData.get("fileExt");
 
-  if (!file) return NextResponse.json({ error: "你没有上传任何东西" });
-
   try {
     // 定义暂存路径
-    const uploadDir = path.join(
-      process.cwd(),
-      `/uploadCache/${fileName}-total${chunkNum}`
-    );
+    const uploadDir = path.join(process.cwd(), `/uploadCache/${fileName}-total${chunkNum}`);
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
     const filePath = path.join(uploadDir, `chunk-${chunkIndex}`);
     const reader = file.stream().getReader();
     const writer = fs.createWriteStream(filePath);
 
-    const pump = async () => {
-      const { done, value } = await reader.read();
-      if (done) {
-        writer.end();
-        return console.log(`写入chunk-${chunkIndex} 成功`);
-      }
-      writer.write(value);
+    // 缓存分片
+    await new Promise((resolve) => {
+      const pump = async () => {
+        const { done, value } = await reader.read();
+        if (done) {
+          writer.end();
+          writer.on("finish", resolve);
+          return console.log(`写入chunk-${chunkIndex} 成功`);
+        }
+        writer.write(value);
+        pump();
+      };
       pump();
-    };
-    pump();
+    });
+
+    // 合并
+    if (Number(chunkIndex) === chunkNum - 1) {
+      mergeFs(
+        uploadDir,
+        path.join(process.cwd(), `/uploadCache/${fileName}.${fileExt}`),
+        chunkNum,
+        `${fileName}.${fileExt}`
+      );
+    }
+
     return NextResponse.json({ error: "上传成功" });
   } catch (err) {
     console.log(err);
