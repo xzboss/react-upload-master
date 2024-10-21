@@ -1,5 +1,5 @@
 "use client";
-import { startTransition, useState } from "react";
+import { useState } from "react";
 import { Button } from "antd";
 import Trigger from "@/components/Trigger";
 import List from "@/components/List";
@@ -7,13 +7,37 @@ import { post } from "@/utils/request";
 
 const chunkSize = 1024 * 1024;
 
-const ChunkUpload = () => {
-  console.clear();
-  const [fileList, setFileList] = useState([]); // { file: File, progress: number, controller: AbortController }[]
+const ResumableUpload = () => {
+  const [fileList, setFileList] = useState([]);
 
   const onChange = (files) => {
-    setFileList(Array.from(files).map((file) => ({ file, progress: 0, controller: new AbortController() })));
+    const list = Array.from(files).map((file) => ({
+      file,
+      progress: 0,
+      controller: new AbortController(),
+      hash: { value: "", progress: 0 },
+    }));
+
+    // 计算 hash
+    list.map((file) => {
+      const worker = new Worker("/hash.js");
+      const chunkNum = Math.ceil(file.file.size / chunkSize);
+      const chunkList = [];
+      for (let i = 0; i < chunkNum; i++) {
+        const chunkStart = i * chunkSize;
+        const chunkEnd = Math.min(chunkStart + chunkSize, file.file.size);
+        chunkList.push(file.file.slice(chunkStart, chunkEnd));
+      }
+      worker.postMessage({ chunkList });
+      worker.onmessage = function ({ data: { value, progress } }) {
+        file.hash.value = value;
+        file.hash.progress = progress;
+        setFileList([...list]);
+      };
+    });
+    setFileList([...list]);
   };
+
   const submit = () => {
     console.log(fileList);
     for (const file of fileList) {
@@ -31,6 +55,7 @@ const ChunkUpload = () => {
         formData.append("chunkNum", chunkNum);
         formData.append("fileName", file.file.name.split(".")[0]);
         formData.append("fileExt", file.file.name.split(".")[1] || "");
+        formData.append("contentHash", file.file.hash.value);
 
         post("/api/chunk-upload", formData, {
           headers: {
@@ -58,9 +83,9 @@ const ChunkUpload = () => {
       <Trigger onChange={onChange} multiple={true}>
         select
       </Trigger>
-      <List fileList={fileList} onRemove={onRemove} onCancel={onCancel} />
+      <List fileList={fileList} onRemove={onRemove} onCancel={onCancel} hashProgress={true} />
       {fileList.length > 0 ? <Button color="green" type="primary" onClick={submit} children="submit" /> : ""}
     </div>
   );
 };
-export default ChunkUpload;
+export default ResumableUpload;

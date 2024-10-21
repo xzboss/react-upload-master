@@ -13,7 +13,7 @@ import style from "./index.module.scss";
  * @param {Function} onRemove - 文件移除回调函数
  * @param {Function} onCancel - 文件上传取消回调函数
  */
-const List = ({ fileList = [], onRemove, onCancel }) => {
+const List = ({ fileList = [], onRemove, onCancel, hashProgress = false }) => {
   const remove = (index) => {
     onRemove(index);
   };
@@ -24,12 +24,9 @@ const List = ({ fileList = [], onRemove, onCancel }) => {
   };
   return (
     <div className={style.container}>
-      {fileList.map(({ file, progress, controller }, index) => {
+      {fileList.map(({ file, progress, controller, hash }, index) => {
         return (
-          <div
-            className={style.itemWrapper}
-            key={index}
-            style={{ opacity: controller.signal.aborted ? 0.5 : 1 }}>
+          <div className={style.itemWrapper} key={index} style={{ opacity: controller.signal.aborted ? 0.5 : 1 }}>
             <div className={style.content}>
               <div className={style.filename}>{file.name}</div>
               <div className={style.operation}>
@@ -41,7 +38,18 @@ const List = ({ fileList = [], onRemove, onCancel }) => {
                 </Button>
               </div>
             </div>
-            <Progress percent={progress} className={style.progress} />
+            {hash ? (
+              <div>
+                generate hash progress
+                <Progress percent={hash.progress} className={style.progress} />
+              </div>
+            ) : (
+              ""
+            )}
+            <div>
+              upload progress
+              <Progress percent={progress} className={style.progress} />
+            </div>
           </div>
         );
       })}
