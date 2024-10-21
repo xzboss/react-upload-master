@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 
+// 生成简单文件
 export const generateFile = (size) => {
   size = Number(size);
   if (size <= 0 || typeof size !== "number") return;

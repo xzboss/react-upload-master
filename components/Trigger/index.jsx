@@ -17,7 +17,10 @@ const Trigger = ({ children, className, onChange, multiple = false }) => {
         type="file"
         className={style.fileInput}
         ref={inputRef}
-        onChange={(e) => onChange(e.target.files)}
+        onChange={(e) => {
+          onChange(e.target.files);
+          e.target.value = "";
+        }}
       />
       <Button className={className || ""} onClick={handleClick}>
         {children}
