@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
     { key: "2", label: <Link href="/views/multiple-upload">multiple</Link> },
     { key: "3", label: <Link href="/views/chunk-upload">chunk</Link> },
     { key: "4", label: <Link href="/views/resumable-upload">resumable</Link> },
-    { key: "5", label: <Link href="/views/single-upload">single</Link> },
+    { key: "5", label: <Link href="/views/instant-upload">instant</Link> },
     { key: "6", label: <Link href="/views/single-upload">single</Link> },
     { key: "7", label: <Link href="/views/single-upload">single</Link> },
   ];
