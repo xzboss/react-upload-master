@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import Trigger from "@/components/Trigger";
 import List from "@/components/List";
 import { post } from "@/utils/request";
@@ -41,9 +41,26 @@ const InstantUpload = () => {
 
   const submit = async () => {
     for (const file of fileList) {
-      // 分片
       const chunkNum = Math.ceil(file.file.size / chunkSize);
-      for (let i = 0; i < chunkNum; i++) {
+      // 是否已经上传
+      let {
+        data: { uploaded, chunkIndex },
+      } = await axios({
+        url: "/api/chunk-index",
+        params: {
+          hash: file.hash.value,
+          fileName: file.file.name,
+          chunkNum,
+        },
+      });
+      console.log(uploaded, chunkIndex, chunkNum);
+      if (!uploaded) chunkIndex = 0;
+      if (Number(chunkIndex) === chunkNum - 1) {
+        return message.success("秒传成功");
+      }
+
+      // 分片
+      for (let i = chunkIndex; i < chunkNum; i++) {
         const chunkStart = i * chunkSize;
         const chunkEnd = Math.min(chunkStart + chunkSize, file.file.size);
         const fileChunk = file.file.slice(chunkStart, chunkEnd);
@@ -56,7 +73,7 @@ const InstantUpload = () => {
         formData.append("fileExt", file.file.name.split(".")[1] || "");
         formData.append("contentHash", file.hash.value);
 
-        post("/api/resumable-upload", formData, {
+        post("/api/instant-upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -112,7 +129,7 @@ const InstantUpload = () => {
       formData.append("fileExt", file.file.name.split(".")[1] || "");
       formData.append("contentHash", file.hash.value);
 
-      post("/api/resumable-upload", formData, {
+      post("/api/instant-upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
