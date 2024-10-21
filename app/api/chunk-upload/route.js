@@ -27,7 +27,6 @@ async function mergeFs(fileDir, filePath, chunkNum, fileName) {
 }
 
 export async function POST(req) {
-  console.clear();
   const formData = await req.formData();
   const file = formData.get("file");
   const chunkIndex = formData.get("chunkIndex");

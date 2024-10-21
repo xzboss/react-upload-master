@@ -8,36 +8,18 @@ export const config = {
   },
 };
 
-// 合并文件
-async function mergeFs(fileDir, filePath, chunkNum, fileName) {
-  const writeStream = fs.createWriteStream(filePath);
-  await new Promise((resolve, _) => {
-    for (let i = 0; i < chunkNum; i++) {
-      const chunkPath = path.join(fileDir, `chunk-${i}`);
-      const data = fs.readFileSync(chunkPath);
-      writeStream.write(data);
-      fs.unlinkSync(chunkPath);
-    }
-    writeStream.end();
-    writeStream.on("finish", resolve);
-  });
-
-  fs.rmdirSync(fileDir);
-  return console.log(`合并${fileName} 成功`);
-}
-
 export async function POST(req) {
-  console.clear();
   const formData = await req.formData();
   const file = formData.get("file");
   const chunkIndex = formData.get("chunkIndex");
   const chunkNum = formData.get("chunkNum");
   const fileName = formData.get("fileName");
   const fileExt = formData.get("fileExt");
+  const contentHash = formData.get("contentHash");
 
   try {
     // 定义暂存路径
-    const uploadDir = path.join(process.cwd(), `/uploadCache/${fileName}-total${chunkNum}`);
+    const uploadDir = path.join(process.cwd(), `/uploadCache/${contentHash}`);
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
     const filePath = path.join(uploadDir, `chunk-${chunkIndex}`);
@@ -63,9 +45,9 @@ export async function POST(req) {
     if (Number(chunkIndex) === chunkNum - 1) {
       mergeFs(
         uploadDir,
-        path.join(process.cwd(), `/uploadCache/${fileName}.${fileExt}`),
+        path.join(process.cwd(), `/uploadCache/${fileName}-${contentHash}.${fileExt}`),
         chunkNum,
-        `${fileName}.${fileExt}`
+        `${fileName}-${contentHash}.${fileExt}`
       );
     }
 
@@ -74,4 +56,29 @@ export async function POST(req) {
     console.log(err);
     return NextResponse.json({ error: "500" });
   }
+}
+
+/**
+ * @description 合并
+ * @param {文件目录} fileDir
+ * @param {文件路径} filePath
+ * @param {分片数量} chunkNum
+ * @param {文件名} fileName
+ * @returns
+ */
+async function mergeFs(fileDir, filePath, chunkNum, fileName) {
+  const writeStream = fs.createWriteStream(filePath);
+  await new Promise((resolve, _) => {
+    for (let i = 0; i < chunkNum; i++) {
+      const chunkPath = path.join(fileDir, `chunk-${i}`);
+      const data = fs.readFileSync(chunkPath);
+      writeStream.write(data);
+      fs.unlinkSync(chunkPath);
+    }
+    writeStream.end();
+    writeStream.on("finish", resolve);
+  });
+
+  fs.rmdirSync(fileDir);
+  return console.log(`合并${fileName} 成功`);
 }

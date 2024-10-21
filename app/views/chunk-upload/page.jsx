@@ -19,7 +19,6 @@ const ChunkUpload = () => {
     for (const file of fileList) {
       // 分片
       const chunkNum = Math.ceil(file.file.size / chunkSize);
-      const part = Math.round((1 / chunkNum) * 100);
       for (let i = 0; i < chunkNum; i++) {
         const chunkStart = i * chunkSize;
         const chunkEnd = Math.min(chunkStart + chunkSize, file.file.size);
@@ -38,8 +37,10 @@ const ChunkUpload = () => {
           },
           signal: file.controller.signal,
           onUploadProgress: (event) => {
-            file.progress = part * i + Math.round(part * event.progress * 100);
-            setFileList([...fileList]);
+            if (event.progress === 1) {
+              file.progress += Math.ceil((1 / chunkNum) * 100);
+              setFileList([...fileList]);
+            }
           },
         });
       }

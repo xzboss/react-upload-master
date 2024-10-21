@@ -13,20 +13,29 @@ import style from "./index.module.scss";
  * @param {Function} onRemove - 文件移除回调函数
  * @param {Function} onCancel - 文件上传取消回调函数
  */
-const List = ({ fileList = [], onRemove, onCancel, hashProgress = false }) => {
+const List = ({ fileList = [], onRemove, onCancel, onStop, onResume }) => {
   const remove = (index) => {
     onRemove(index);
   };
   const cancel = (index, controller, progress) => {
-    if ((progress >= 100 || controller.signal, aborted)) return;
+    if (progress >= 100 || controller.signal.aborted) return;
     controller.abort();
     onCancel(index);
+  };
+  const stop = (index, controller, progress) => {
+    if (progress >= 100 || controller.signal.aborted) return;
+    controller.abort();
+    onStop(index);
+  };
+  const resume = (file, progress, controller, hash, index) => {
+    if (progress >= 100 || !controller.signal.aborted) return;
+    onResume(file, progress, controller, hash, index);
   };
   return (
     <div className={style.container}>
       {fileList.map(({ file, progress, controller, hash }, index) => {
         return (
-          <div className={style.itemWrapper} key={index} style={{ opacity: controller.signal.aborted ? 0.5 : 1 }}>
+          <div className={style.itemWrapper} key={index} style={{ opacity: controller.signal.aborted ? 0.8 : 1 }}>
             <div className={style.content}>
               <div className={style.filename}>{file.name}</div>
               <div className={style.operation}>
@@ -36,16 +45,18 @@ const List = ({ fileList = [], onRemove, onCancel, hashProgress = false }) => {
                 <Button danger onClick={() => cancel(index, controller, progress)}>
                   cancel
                 </Button>
+                <Button danger onClick={() => stop(index, controller, progress)}>
+                  stop
+                </Button>
+                <Button onClick={() => resume(file, progress, controller, hash, index)}>resume</Button>
               </div>
             </div>
-            {hash ? (
-              <div>
-                generate hash progress
-                <Progress percent={hash.progress} className={style.progress} />
-              </div>
-            ) : (
-              ""
-            )}
+
+            <div>
+              generate hash progress
+              <Progress percent={hash?.progress} className={style.progress} />
+            </div>
+
             <div>
               upload progress
               <Progress percent={progress} className={style.progress} />
