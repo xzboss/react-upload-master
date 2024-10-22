@@ -21,7 +21,7 @@ const List = ({ fileList = [], onRemove, onStop, onResume }) => {
     <div className={style.container}>
       {fileList.map(({ file, progress, controller, hash }, index) => {
         return (
-          <div className={style.itemWrapper} key={index}>
+          <div className={style.itemWrapper} key={file.name}>
             <div className={style.content}>
               <div className={style.filename}>{file.name}</div>
               <div className={style.operation}>

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Spin } from "antd";
 import Trigger from "@/components/Trigger";
 import List from "@/components/List";
@@ -26,7 +26,7 @@ const MultipleUpload = () => {
         signal: file.controller.signal,
         onUploadProgress: (event) => {
           file.progress = (event.progress * 100) >> 0;
-          setFileList([...fileList]);
+          setFileList((list) => [...list]);
         },
       }).finally(() => setIng(false));
     }
