@@ -1,3 +1,6 @@
 .m-loading {
     margin-bottom: 10px;
 }
+.ant-progress-text-end{
+    width: 30px !important;
+}

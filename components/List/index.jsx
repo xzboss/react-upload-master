@@ -52,7 +52,7 @@ const List = ({ fileList = [], onRemove, onStop, onResume }) => {
 
             <div>
               upload progress
-              <Progress percent={progress} className={style.progress} />
+              <Progress percent={Math.ceil(progress)} className={style.progress} />
             </div>
           </div>
         );

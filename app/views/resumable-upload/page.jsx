@@ -101,7 +101,7 @@ const ResumableUpload = () => {
         signal: file.controller.signal,
         onUploadProgress: (event) => {
           if (event.progress === 1) {
-            file.progress += Math.ceil((1 / chunkNum) * 100);
+            file.progress = (file.progress + (1 / chunkNum) * 100);
             setFileList((list) => [...list]);
           }
         },

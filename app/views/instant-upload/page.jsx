@@ -42,10 +42,7 @@ const InstantUpload = () => {
 
   const submit = async () => {
     if (fileList.some(({ hash }) => !hash.value)) return message.loading("请等待hash计算完成");
-    if (ing) return;
-    setIng(true);
-
-    for (const file of fileList) {
+    fileList.forEach(async (file, index) => {
       const chunkNum = Math.ceil(file.file.size / chunkSize);
       // 是否已经上传
       let {
@@ -59,43 +56,50 @@ const InstantUpload = () => {
         },
       });
 
-      if (!uploaded) chunkIndex = 0;
       if (Number(chunkIndex) === chunkNum - 1) {
-        setIng(false);
-        fileList.forEach((file) => (file.progress = 100));
+        file.progress = 100;
         setFileList([...fileList]);
         return message.success("秒传成功");
       }
+      if (!uploaded) chunkIndex = 0;
 
-      fileList.forEach((file, index) => {
-        onResume(file.file, file.progress, file.controller, file.hash, index);
-      });
-    }
+      file.progress = Math.floor((chunkIndex / chunkNum) * 100);
+      onResume(file.file, file.progress, file.controller, file.hash, index);
+    });
   };
+
   const onRemove = (index) => {
     fileList.splice(index, 1);
     setFileList([...fileList]);
   };
+
   // 暂停
   const onStop = (index) => {
     setFileList([...fileList]);
   };
+
   // 继续
   const onResume = async (file, progress, controller, hash, index) => {
     if (hash.value === "") return message.loading("请等待hash计算完成");
-    if (ing) return;
-    setIng(true);
+    const chunkNum = Math.ceil(file.size / chunkSize);
 
     // 获取传到哪个分片
     let {
       data: { uploaded, chunkIndex },
-    } = await axios(`/api/chunk-index?hash=${hash.value}`);
+    } = await axios({
+      url: "/api/chunk-index",
+      params: {
+        hash: hash.value,
+        fileName: file.name,
+        chunkNum,
+      },
+    });
 
     if (!uploaded) chunkIndex = 0;
 
     file = {
       file,
-      progress,
+      progress: progress,
       controller: new AbortController(),
       hash,
     };
@@ -103,7 +107,6 @@ const InstantUpload = () => {
     fileList[index] = file;
     setFileList([...fileList]);
 
-    const chunkNum = Math.ceil(file.file.size / chunkSize);
     for (let i = chunkIndex; i < chunkNum; i++) {
       const chunkStart = i * chunkSize;
       const chunkEnd = Math.min(chunkStart + chunkSize, file.file.size);
@@ -124,7 +127,7 @@ const InstantUpload = () => {
         signal: file.controller.signal,
         onUploadProgress: (event) => {
           if (event.progress === 1) {
-            file.progress += Math.ceil((1 / chunkNum) * 100);
+            file.progress = (file.progress + (1 / chunkNum) * 100);
             setFileList((list) => [...list]);
           }
         },
