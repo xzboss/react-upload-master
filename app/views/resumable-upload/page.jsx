@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button } from "antd";
+import { Button, Spin } from "antd";
 import Trigger from "@/components/Trigger";
 import List from "@/components/List";
 import { post } from "@/utils/request";
@@ -10,6 +10,7 @@ const chunkSize = 1024 * 1024;
 
 const ResumableUpload = () => {
   const [fileList, setFileList] = useState([]);
+  const [ing, setIng] = useState(false);
 
   const onChange = (files) => {
     const list = Array.from(files).map((file) => ({
@@ -40,6 +41,8 @@ const ResumableUpload = () => {
   };
 
   const submit = async () => {
+    if (ing) return;
+    setIng(true);
     for (const file of fileList) {
       // 分片
       const chunkNum = Math.ceil(file.file.size / chunkSize);
@@ -64,10 +67,10 @@ const ResumableUpload = () => {
           onUploadProgress: (event) => {
             if (event.progress === 1) {
               file.progress += Math.ceil((1 / chunkNum) * 100);
-              setFileList([...fileList]);
+              setFileList((list) => [...list]);
             }
           },
-        });
+        }).finally(() => setIng(false)); // 全部请求执行后回调，不止此请求
       }
     }
   };
@@ -81,6 +84,8 @@ const ResumableUpload = () => {
   };
   // 继续
   const onResume = async (file, progress, controller, hash, index) => {
+    if (ing) return;
+    setIng(true);
     // 获取传到哪个分片
     let {
       data: { uploaded, chunkIndex },
@@ -120,18 +125,20 @@ const ResumableUpload = () => {
         onUploadProgress: (event) => {
           if (event.progress === 1) {
             file.progress += Math.ceil((1 / chunkNum) * 100);
-            setFileList([...fileList]);
+            setFileList((list) => [...list]);
           }
         },
-      });
+      }).finally(() => setIng(false)); // 全部请求执行后回调，不止此请求
     }
   };
   return (
     <div>
+      <Spin spinning={ing} className="m-loading" />
+
       <Trigger onChange={onChange} multiple={true}>
         select
       </Trigger>
-      <List fileList={fileList} onRemove={onRemove} onStop={onStop} onResume={onResume} hashProgress={true} />
+      <List fileList={fileList} onRemove={onRemove} onStop={onStop} onResume={onResume} />
       {fileList.length > 0 ? <Button color="green" type="primary" onClick={submit} children="submit" /> : ""}
     </div>
   );

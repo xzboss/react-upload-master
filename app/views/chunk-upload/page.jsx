@@ -1,6 +1,6 @@
 "use client";
-import { startTransition, useState } from "react";
-import { Button } from "antd";
+import { useState } from "react";
+import { Button, Spin } from "antd";
 import Trigger from "@/components/Trigger";
 import List from "@/components/List";
 import { post } from "@/utils/request";
@@ -8,14 +8,14 @@ import { post } from "@/utils/request";
 const chunkSize = 1024 * 1024;
 
 const ChunkUpload = () => {
-  console.clear();
-  const [fileList, setFileList] = useState([]); // { file: File, progress: number, controller: AbortController }[]
-
+  const [ing, setIng] = useState(false);
+  const [fileList, setFileList] = useState([]);
   const onChange = (files) => {
     setFileList(Array.from(files).map((file) => ({ file, progress: 0, controller: new AbortController() })));
   };
   const submit = () => {
-    console.log(fileList);
+    if (ing) return;
+    setIng(true);
     for (const file of fileList) {
       // 分片
       const chunkNum = Math.ceil(file.file.size / chunkSize);
@@ -39,10 +39,10 @@ const ChunkUpload = () => {
           onUploadProgress: (event) => {
             if (event.progress === 1) {
               file.progress += Math.ceil((1 / chunkNum) * 100);
-              setFileList([...fileList]);
+              setFileList((list) => [...list]);
             }
           },
-        });
+        }).finally(() => setIng(false));
       }
     }
   };
@@ -50,16 +50,13 @@ const ChunkUpload = () => {
     fileList.splice(index, 1);
     setFileList([...fileList]);
   };
-  const onCancel = (index) => {
-    setFileList([...fileList]);
-    //
-  };
   return (
     <div>
+      <Spin spinning={ing} className="m-loading" />
       <Trigger onChange={onChange} multiple={true}>
         select
       </Trigger>
-      <List fileList={fileList} onRemove={onRemove} onCancel={onCancel} />
+      <List fileList={fileList} onRemove={onRemove} />
       {fileList.length > 0 ? <Button color="green" type="primary" onClick={submit} children="submit" /> : ""}
     </div>
   );

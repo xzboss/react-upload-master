@@ -9,15 +9,17 @@ class RequestController {
     return new Promise((resolve, reject) => {
       const fn = () => {
         const res = axios.post(...args);
-        res.finally(() => {
-          this.requestQueue.delete(fn);
-          if (this.requestQueue.size === 0 && this.waitQueue.length === 0) resolve();
-          if (this.waitQueue.length > 0) {
-            const request = this.waitQueue.shift();
-            this.requestQueue.add(request);
-            request();
-          }
-        });
+        res
+          .finally(() => {
+            this.requestQueue.delete(fn);
+            if (this.requestQueue.size === 0 && this.waitQueue.length === 0) resolve();
+            if (this.waitQueue.length > 0) {
+              const request = this.waitQueue.shift();
+              this.requestQueue.add(request);
+              request();
+            }
+          })
+          .catch(() => {});
       };
       this.waitQueue.push(fn);
       if (this.requestQueue.size < this.maxSize) {
