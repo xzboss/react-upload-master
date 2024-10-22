@@ -2,11 +2,7 @@ import fs from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+
 
 export async function POST(req) {
   const formData = await req.formData();

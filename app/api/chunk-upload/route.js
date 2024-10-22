@@ -2,11 +2,7 @@ import fs from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+
 
 // 合并文件
 async function mergeFs(fileDir, filePath, chunkNum, fileName) {
