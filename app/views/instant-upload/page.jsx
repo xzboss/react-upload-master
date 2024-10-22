@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button, message } from "antd";
+import { Button, Spin, message } from "antd";
 import Trigger from "@/components/Trigger";
 import List from "@/components/List";
 import { post } from "@/utils/request";
@@ -10,6 +10,7 @@ const chunkSize = 1024 * 1024;
 
 const InstantUpload = () => {
   const [fileList, setFileList] = useState([]);
+  const [ing, setIng] = useState(false);
 
   const onChange = (files) => {
     const list = Array.from(files).map((file) => ({
@@ -33,13 +34,17 @@ const InstantUpload = () => {
       worker.onmessage = function ({ data: { value, progress } }) {
         file.hash.value = value;
         file.hash.progress = progress;
-        setFileList([...list]);
+        setFileList((l) => [...l]);
       };
     });
     setFileList([...list]);
   };
 
   const submit = async () => {
+    if (fileList.some(({ hash }) => !hash.value)) return message.loading("请等待hash计算完成");
+    if (ing) return;
+    setIng(true);
+
     for (const file of fileList) {
       const chunkNum = Math.ceil(file.file.size / chunkSize);
       // 是否已经上传
@@ -53,39 +58,18 @@ const InstantUpload = () => {
           chunkNum,
         },
       });
-      console.log(uploaded, chunkIndex, chunkNum);
+
       if (!uploaded) chunkIndex = 0;
       if (Number(chunkIndex) === chunkNum - 1) {
+        setIng(false);
+        fileList.forEach((file) => (file.progress = 100));
+        setFileList([...fileList]);
         return message.success("秒传成功");
       }
 
-      // 分片
-      for (let i = chunkIndex; i < chunkNum; i++) {
-        const chunkStart = i * chunkSize;
-        const chunkEnd = Math.min(chunkStart + chunkSize, file.file.size);
-        const fileChunk = file.file.slice(chunkStart, chunkEnd);
-
-        const formData = new FormData();
-        formData.append("file", fileChunk);
-        formData.append("chunkIndex", i);
-        formData.append("chunkNum", chunkNum);
-        formData.append("fileName", file.file.name.split(".")[0]);
-        formData.append("fileExt", file.file.name.split(".")[1] || "");
-        formData.append("contentHash", file.hash.value);
-
-        post("/api/instant-upload", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          signal: file.controller.signal,
-          onUploadProgress: (event) => {
-            if (event.progress === 1) {
-              file.progress += Math.ceil((1 / chunkNum) * 100);
-              setFileList([...fileList]);
-            }
-          },
-        });
-      }
+      fileList.forEach((file, index) => {
+        onResume(file.file, file.progress, file.controller, file.hash, index);
+      });
     }
   };
   const onRemove = (index) => {
@@ -98,6 +82,10 @@ const InstantUpload = () => {
   };
   // 继续
   const onResume = async (file, progress, controller, hash, index) => {
+    if (hash.value === "") return message.loading("请等待hash计算完成");
+    if (ing) return;
+    setIng(true);
+
     // 获取传到哪个分片
     let {
       data: { uploaded, chunkIndex },
@@ -137,10 +125,10 @@ const InstantUpload = () => {
         onUploadProgress: (event) => {
           if (event.progress === 1) {
             file.progress += Math.ceil((1 / chunkNum) * 100);
-            setFileList([...fileList]);
+            setFileList((list) => [...list]);
           }
         },
-      });
+      }).finally(() => setIng(false)); // 全部请求执行后回调，不止此请求
     }
   };
   return (
